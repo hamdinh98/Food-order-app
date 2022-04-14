@@ -10,13 +10,57 @@ const defaultCartState = {
 const cartReducer = (state, action) => {
     switch (action.type) {
         case "ADD":
-            const updateditems = state.items.concat(action.item);
-            const updatedTotalAmount = state.totalAmout + action.item.price * action.item.amount
+            const existCartItemIndex = state.items.findIndex((it) => it.id === action.item.id)
+
+            const existItem = state.items[existCartItemIndex]
+            let updatedItems;
+            let updatedTotalAmount
+
+            updatedTotalAmount = state.totalAmout + action.item.price * action.item.amount
+            if (existItem) {
+
+                const updateOneItem = {
+                    ...existItem,
+                    amount: parseInt(existItem.amount) + parseInt(action.item.amount)
+                }
+                updatedItems = [...state.items];
+                updatedItems[existCartItemIndex] = updateOneItem
+            }
+            else {
+
+                updatedItems = state.items.concat(action.item);
+            }
+
+
+            return {
+                items: updatedItems,
+                totalAmout: updatedTotalAmount
+            }
+        case 'DELETE':
+            const it = state.items.filter((item) => item.id === action.id)
+            let updatedTotal = state.totalAmout - it.price
+            let updateditems
+            if (it.amount === 1) {
+                updateditems = state.items.filter((item) => item.id !== action.id)
+            }
+            else {
+                const updateOneItem = {
+                    ...it,
+                    amount: it.amount - 1
+                }
+
+                updateditems = [
+                    ...state.items,
+                    updateOneItem
+                ]
+            }
 
             return {
                 items: updateditems,
-                totalAmout: updatedTotalAmount
+                totalAmout: updatedTotal
             }
+
+
         default:
             return state
     }
@@ -29,9 +73,15 @@ export const ContextProvider = (props) => {
             type: 'ADD',
             item: item
         })
-
     }
-    const Delete = (id) => {
+
+
+    const Delete = (idItem) => {
+
+        dispatchCartState({
+            type: 'DELETE',
+            id: idItem
+        })
 
     }
 
